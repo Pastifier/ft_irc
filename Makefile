@@ -2,6 +2,8 @@ NAME = ircserv
 
 SRC = src/main.cpp
 
+INCLUDE_DIR := include/
+
 OBJS = $(SRC:.cpp=.o)
 
 CC = c++
@@ -18,10 +20,10 @@ irssi:
 	docker rm -f irssi 2>/dev/null
 
 .cpp.o:
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 $(NAME): $(OBJS)
-	$(CC) $(OBJS) $(CFLAGS) -o $(NAME)
+	$(CC) $(OBJS) -I$(INCLUDE_DIR) $(CFLAGS) -o $(NAME)
 
 clean:
 	@$(RM) $(OBJS)
