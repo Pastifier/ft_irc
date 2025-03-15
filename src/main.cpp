@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "printing.hpp"
 #include <sstream>
 
 int is_valid_port(std::string input) {
@@ -7,10 +8,10 @@ int is_valid_port(std::string input) {
 
 	iss >> portno;
 	if (iss.fail() || !iss.eof()) {
-		std::cerr << "Error: invalid port number. Please make sure that the input is an integer in the range (1->65535)." << std::endl;
+		ERROR("Error: invalid port number. Please make sure that the input is an integer in the range (1->65535).");
 		return -1;
 	} else if (portno < 1 || portno > 65535) {
-		std::cerr << "Error: invalid port number. Please make sure that the input is an integer in the range (1->65535)." << std::endl;
+		ERROR("Error: invalid port number. Please make sure that the input is an integer in the range (1->65535).");
 		return -1;
 	}
 	return portno;
