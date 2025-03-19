@@ -61,6 +61,74 @@ public:
             throw std::runtime_error("Listen failed: " + __FT_IRC_ERRNO_QUERY);
     }
 
+    Socket* accept() {
+        if (!_isServer)
+            throw std::runtime_error("Cannot accept on a client socket!");
+        
+        struct sockaddr_in clientAddr;
+        socklen_t clientLen = sizeof(clientAddr);
+
+        int clientFd = ::accept(_fd, (struct sockaddr*)&clientAddr, &clientLen);
+        if (clientFd < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                return NULL; // non-blocking socket, no connections pending
+            throw std::runtime_error("Accept failed: " + __FT_IRC_ERRNO_QUERY);
+        }
+
+        return new Socket(clientFd, clientAddr);
+    }
+
+    int send(std::string const& msg) {
+        int sent = ::send(_fd, msg.c_str(), msg.length(), 0);
+        if (sent < 0)
+            throw std::runtime_error("Send failed: " + __FT_IRC_ERRNO_QUERY);
+        
+        return sent;
+    }
+
+    std::string receive(size_t bufferSize) { // (=1024)
+        char buffer[bufferSize];
+        std::memset(buffer, 0, bufferSize);
+
+        int received = ::recv(_fd, buffer, bufferSize - 1, 0);
+        if (received < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                return ""; // same as above
+            throw std::runtime_error("Receive failed: " + __FT_IRC_ERRNO_QUERY);
+        }
+
+        if (received == 0)
+            throw std::runtime_error("Connection closed by peer.");
+
+        buffer[received] = '\0';
+        return std::string(buffer);
+    }
+
+    void setNonBlocking() {
+        int flags = fcntl(_fd, F_GETFL, 0);
+        if (flags < 0)
+            throw std::runtime_error("Failed to get socket flags: " + std::string(strerror(errno)));
+            
+        if (fcntl(_fd, F_SETFL, flags | O_NONBLOCK) < 0)
+            throw std::runtime_error("Failed to set non-blocking mode: " + std::string(strerror(errno)));
+    }
+    
+    int getFd() const {
+        return _fd;
+    }
+    
+    std::string getIpAddress() const {
+        return std::string(inet_ntoa(_address.sin_addr));
+    }
+    
+    int getPort() const {
+        return ntohs(_address.sin_port);
+    }
+    
+    bool isServer() const {
+        return _isServer;
+    }
+
 private:
     int _fd;
     struct sockaddr_in _address;
