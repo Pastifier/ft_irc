@@ -7,10 +7,11 @@
 #include <poll.h>
 #include <algorithm>
 #include "Socket.hpp"
+#include "Client.hpp"
+#include "Channels.hpp"
+#include "Commands.hpp"
 
-class Client;
-class Channel;
-class Command;
+#include "printing.hpp"
 
 class Server {
 public:
@@ -26,8 +27,8 @@ public:
     void removeClient(Client* client);
     Client* findClientByNickname(const std::string& nickname) const;
     
-    Channel* createChannel(const std::string& name);
-    Channel* findChannel(const std::string& name) const;
+    Channels* createChannels(const std::string& name);
+    Channels* findChannels(const std::string& name) const;
     
     void registerCommands();
     bool executeCommand(Client* client, const std::string& commandName, 
@@ -44,13 +45,13 @@ public:
     const std::string& getVersion() const;
     const std::string& getPassword() const;
     const std::vector<Client*>& getClients() const;
-    const std::map<std::string, Channel*>& getChannels() const;
+    const std::map<std::string, Channels*>& getChannelss() const;
 
 private:
     Socket* _serverSocket;
     std::vector<Client*> _clients;
-    std::map<std::string, Channel*> _channels; // Active channels
-    std::map<std::string, Command*> _commands;
+    std::map<std::string, Channels*> _Channelss; // Active Channelss
+    std::map<std::string, Commands*> _commands;
 
     struct pollfd* _pollfds;
     size_t _pollfdCount;
@@ -64,7 +65,7 @@ private:
     Server(Server const& other);
     Server& operator=(Server const& rhs);
 
-    void _preparePollArray() {}
+    void _preparePollArray();
     void _resizePollArrayIfNeeded(size_t neededSize);
 };
 
@@ -90,10 +91,10 @@ Server::Server(int port, const std::string& password)
         _pollfds[0].fd = _serverSocket->getFd();
         _pollfds[0].events = POLLIN;
 
-        std::cout << "Server started on port " << port << std::endl;
+        PRINT("Server started on port " << port);
     } 
     catch (const std::exception& e) {
-        std::cerr << "Server initialization error: " << e.what() << std::endl;
+        ERROR("Server initialization error: " << e.what());
         if (_serverSocket) {
             delete _serverSocket;
             _serverSocket = NULL;
@@ -111,12 +112,12 @@ Server::~Server() {
         delete _clients[i];
     _clients.clear();
 
-    for (std::map<std::string, Channel*>::iterator it = _channels.begin(); 
-         it != _channels.end(); ++it)
+    for (std::map<std::string, Channels*>::iterator it = _Channelss.begin(); 
+         it != _Channelss.end(); ++it)
         delete it->second;
-    _channels.clear();
+    _Channelss.clear();
 
-    for (std::map<std::string, Command*>::iterator it = _commands.begin(); 
+    for (std::map<std::string, Commands*>::iterator it = _commands.begin(); 
          it != _commands.end(); ++it)
         delete it->second;
     _commands.clear();
@@ -254,6 +255,6 @@ const std::vector<Client*>& Server::getClients() const {
     return _clients;
 }
 
-const std::map<std::string, Channel*>& Server::getChannels() const {
-    return _channels;
+const std::map<std::string, Channels*>& Server::getChannelss() const {
+    return _Channelss;
 }
