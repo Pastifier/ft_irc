@@ -1,5 +1,6 @@
 
 #include "Server.hpp"
+#include <sstream>
 
 int is_valid_port(std::string input) {
 	std::istringstream iss(input);
@@ -42,7 +43,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	try {
 		Server server(port, pass);
-		server.init();
+		server.initialize();
 		server.run();
 	} catch(const std::exception& e) {
 		std::cerr << e.what() << std::endl;
