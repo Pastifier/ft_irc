@@ -9,6 +9,7 @@ class Server;
 class Client;
 
 class Commands {
+public:
 	virtual ~Commands();
 	virtual void execute(Server *server, Client *client, const std::string& params) = 0;
 };
