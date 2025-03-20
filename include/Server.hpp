@@ -126,6 +126,26 @@ Server::~Server() {
     delete[] _pollfds;
 }
 
+void Server::registerCommands() {
+    _commands["PASS"] = new Pass();
+    _commands["NICK"] = new Nick();
+    _commands["USER"] = new User();
+    _commands["PRIVMSG"] = new Privmsg();
+    _commands["JOIN"] = new Join();
+    _commands["PART"] = new Part();
+    _commands["QUIT"] = new Quit();
+    _commands["KICK"] = new Kick();
+    _commands["INVITE"] = new Invite();
+    _commands["TOPIC"] = new Topic();
+    _commands["MODE"] = new Mode();
+    _commands["NOTICE"] = new Notice();
+    _commands["CAP"] = new Cap();
+    _commands["HELP"] = new Help();
+    _commands["PING"] = new Ping();
+    _commands["OPER"] = new Oper();
+
+}
+
 void Server::initialize() {
     registerCommands();
     _running = true;

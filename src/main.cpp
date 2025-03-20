@@ -23,8 +23,8 @@ bool is_valid_password(const std::string& pass) {
 		return false;
 	}
 	for (size_t i = 0; i < pass.size(); i++) {
-        if (std::isspace(pass[i])) {
-			ERROR("Error: Password cannot contain space!");
+        if (std::isspace(pass[i]) || pass[i] == '\t') {
+			ERROR("Error: Password cannot contain space or tabs!");
             return false;
         }
 	}
