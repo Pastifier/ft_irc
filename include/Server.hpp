@@ -31,8 +31,9 @@ public:
     Channels* findChannels(const std::string& name) const;
     
     void registerCommands();
-    bool executeCommand(Client* client, const std::string& commandName, 
-                        const std::vector<std::string>& parameters);
+    void executeCommand(Client* client, const std::string& commandName,
+                        const std::string& parameters);
+	void processCommand(Client *client, const std::string& line);
     
     bool isAuthenticated(Client* client) const;
     bool isValidPassword(const std::string& password) const;
@@ -40,6 +41,7 @@ public:
     void broadcastMessage(const std::string& message);
     
     void performScheduledTasks();
+
     
     const std::string& getName() const;
     const std::string& getVersion() const;
@@ -219,6 +221,11 @@ void Server::run() {
 
 void Server::handleNewConnection() {
     try {
+		//To make the accept non blocking need to add fcntl()
+		if (fcntl(_serverSocket->getFd(), F_SETFL, O_NONBLOCK) == -1) {
+			ERROR("Error setting socket to non-blocking mode");
+			return;
+		}
         Socket* clientSocket = _serverSocket->accept();
         if (clientSocket != NULL) {
 
@@ -241,13 +248,81 @@ void Server::handleNewConnection() {
     }
 }
 
+void Server::executeCommand(Client *client, const std::string& command, const std::string& params) {
+	std::map<std::string, Commands*>::iterator it = _commands.find(command);
+	if (it == _commands.end()) {
+		std::string response = ":server 421 " + (client->isRegistered() ? client->getNickName() : "*") +
+			" " + command + " :Unknown command\r\n";
+		client->sendMassage(response);
+		return;
+	}
+	if (!client->isAuthenticated() && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT") {
+		std::string response = ":server 464 " + (client->isRegistered() ? client->getNickName(): "*") +
+			" :Password required\r\n";
+		client->sendMassage(response);
+		return;
+	}
+	try {
+		it->second->execute(this, client, params);
+	} catch (const std::exception& e) {
+		std::cerr << "Error executing command " << command << ":" << e.what() << std::endl;
+		std::string response = ":server 500 " + (client->isRegistered() ? client->getNickName() : "*") +
+			" :Internal server error\r\n";
+		client->sendMassage(response);
+	}
+}
+
+void Server::processCommand(Client *client, const std::string& line) {
+	size_t pos = 0;
+	if (line.empty())
+		return;
+	pos = line.find(' ');
+	if (pos == std::string::npos)
+		return;
+	std::string cmd = line.substr(0, pos);
+	while (pos < line.size() && line[pos] == ' ') {
+		pos++;
+	}
+	std::string params = line.substr(pos);
+	executeCommand(client, cmd, params);
+}
+
 void Server::handleClientData(size_t clientIndex)
 {
-    // This is a placeholder for client data handling
-    // Will be implemented once we have the Client class
-    if (clientIndex < _clients.size()) {
-        // Client message handling will go here
-    }
+	Client *client = _clients[clientIndex];
+	if (!client) {
+		ERROR("Client not found for socket");
+		return;
+	}
+	int clientSocket = client->getSocket();
+
+	char buffer[4096];
+	memset(buffer, 0, sizeof(buffer));
+	int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+	if (bytesRead == 0) {
+		removeClient(client);
+		return;
+	}
+	else if (bytesRead < 0) {
+		if (errno != EAGAIN && errno != EWOULDBLOCK) {
+		//EAGAIN indicates that the resource is temporarily unavailable
+		//EWOULDBLOCK indicates the operation cannot proceed at the moment because it would block
+			perror("recv failed");
+			removeClient(client);
+		}
+		return;
+	}
+	buffer[bytesRead] = '\0';
+	int maxlines = 100;
+	int lineCount = 0;
+	while (client->hasCompleteLine() && lineCount < maxlines) {
+		std::string line =  client->getLine();
+		processCommand(client, line);
+		lineCount++;
+	}
+	if (lineCount >= maxlines) {
+		ERROR("Error: Reading the line");
+	}
 }
 
 void Server::performScheduledTasks()
