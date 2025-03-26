@@ -26,19 +26,19 @@ private:
 	std::vector<Channels *> _channels;
 public:
 	Client(int socket);
-	~Client();
+	virtual ~Client();
 
 	/**
 	 * @brief Getters/Setters
 	 */
 	void setNickName(const std::string& nickname);
-	const std::string& getNickName() const;
+	virtual const std::string& getNickName() const;
 	void setUsername(const std::string& username);
-	const std::string& getUsername() const;
+	virtual const std::string& getUsername() const;
 	void setRealname(const std::string& realname);
 	const std::string& getRealname() const;
 	void setHostname(const std::string& hostname);
-	const std::string& getHostname() const;
+	virtual const std::string& getHostname() const;
 	void setAuthenticated(bool auth);
 	bool isAuthenticated() const;
 	void setRegistered(bool reg);
@@ -65,5 +65,5 @@ public:
 	/**
 	 * @brief Message Handling
 	 */
-	void sendMassage(const std::string& message);
+	virtual void sendMessage(const std::string& message);
 };

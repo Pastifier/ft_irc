@@ -1,13 +1,14 @@
 #include "Commands.hpp"
+#include "Server.hpp"
 
 void Pass::execute(Server *server, Client *client, const std::string& params) {
 	//If client is already authenticated, reject
 	if (client->isAuthenticated()) {
-		client->sendMassage(":server 462 " + client->getNickName() + " :You may not reregister");
+		client->sendMessage(":server 462 " + client->getNickName() + " :You may not reregister");
 	}
 	//Check if password is provided
 	if (params.empty()) {
-		client->sendMassage(":server 461 " + client->getNickName() + " PASS :Not enought parameters");
+		client->sendMessage(":server 461 " + client->getNickName() + " PASS :Not enought parameters");
 		return;
 	}
 	//Extract passwod (may have a prefix ":")
@@ -20,6 +21,6 @@ void Pass::execute(Server *server, Client *client, const std::string& params) {
 		client->setAuthenticated(true);
 		//No success message is sent for PASS command
 	} else {
-		client->sendMassage(":server 464 " + client->getNickName() + " :Password incorrect");
+		client->sendMessage(":server 464 " + client->getNickName() + " :Password incorrect");
 	}
 }

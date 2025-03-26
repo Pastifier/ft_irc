@@ -2,9 +2,8 @@
 
 #include <string>
 #include <iostream>
-#include "Server.hpp"
-#include "Client.hpp"
-#include "Channels.hpp"
+#include <sstream>
+#include <cctype>
 
 class Server;
 class Client;
@@ -62,8 +61,8 @@ public:
 
 class Mode: public Commands {
 private:
-	void handleChannelMode(Server *server, Client *client, const std::string& target, const std::string& modeFlags);
-	void handleUserMode(Server *server, Client *client, const std::string& target, const std::string& modeFlags);
+	void handleUserMode(Server* server, Client* client, const std::string& target, const std::string& modeString);
+	void handleChannelMode(Server* server, Client* client, Channels* channel, const std::string& modeString, const std::string& modeParams);
 public:
 	virtual void execute(Server *server, Client *client, const std::string& params);
 };
@@ -93,12 +92,12 @@ public:
 	virtual void execute(Server *server, Client *client, const std::string& params);
 };
 
-class Cap: public Commands {
+class Help: public Commands {
 public:
 	virtual void execute(Server *server, Client *client, const std::string& params);
 };
 
-class Help: public Commands {
+class Bot: public Commands {
 public:
 	virtual void execute(Server *server, Client *client, const std::string& params);
 };

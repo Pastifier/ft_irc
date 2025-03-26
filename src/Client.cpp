@@ -112,7 +112,7 @@ bool Client::hasCompleteLine() const {
  * if the message fails to send or if not all bytes were sent.
  * @param message 
  */
-void Client::sendMassage(const std::string& message) {
+void Client::sendMessage(const std::string& message) {
 	std::string formattedMessage = message;
 	if (formattedMessage.length() < 2 ||
 		formattedMessage.substr(formattedMessage.length() - 2) != "\r\n") {
