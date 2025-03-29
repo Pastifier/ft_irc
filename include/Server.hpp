@@ -39,6 +39,8 @@ public:
     bool isValidPassword(const std::string& password) const;
 
     void broadcastMessage(const std::string& message);
+	bool isNicknameAvailable(const std::string& nickname) const;
+	void sendToChannel(Channels *channel, const std::string& message, Client *exclude);
     
     void performScheduledTasks();
 
@@ -253,13 +255,13 @@ void Server::executeCommand(Client *client, const std::string& command, const st
 	if (it == _commands.end()) {
 		std::string response = ":server 421 " + (client->isRegistered() ? client->getNickName() : "*") +
 			" " + command + " :Unknown command\r\n";
-		client->sendMassage(response);
+		client->sendMessage(response);
 		return;
 	}
 	if (!client->isAuthenticated() && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT") {
 		std::string response = ":server 464 " + (client->isRegistered() ? client->getNickName(): "*") +
 			" :Password required\r\n";
-		client->sendMassage(response);
+		client->sendMessage(response);
 		return;
 	}
 	try {
@@ -268,7 +270,7 @@ void Server::executeCommand(Client *client, const std::string& command, const st
 		std::cerr << "Error executing command " << command << ":" << e.what() << std::endl;
 		std::string response = ":server 500 " + (client->isRegistered() ? client->getNickName() : "*") +
 			" :Internal server error\r\n";
-		client->sendMassage(response);
+		client->sendMessage(response);
 	}
 }
 
@@ -322,6 +324,23 @@ void Server::handleClientData(size_t clientIndex)
 	}
 	if (lineCount >= maxlines) {
 		ERROR("Error: Reading the line");
+	}
+}
+
+bool Server::isNicknameAvailable(const std::string& nickname) const {
+	for (std::vector<Client *>::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		if ((*it)->getNickName() == nickname)
+		return false;
+	}
+	return true;
+}
+
+void Server::sendToChannel(Channels *channel, const std::string& message, Client *exclude) {
+	std::vector<Client *> clients = channel->getClients();
+	for (size_t i = 0; i < clients.size(); ++i) {
+		if (clients[i] != exclude) {
+			clients[i]->sendMessage(message);
+		}
 	}
 }
 
