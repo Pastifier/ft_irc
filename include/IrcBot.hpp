@@ -20,7 +20,7 @@ public:
 	void initializeCommands();
 	void initializeResponses();
 	void processMessage(Server *server, const std::string& channel, const std::string& sender, const std::string& message);
-	void sendMessage(Server *server, const std::string& channel, const std::string& message);
+	void sendMsg(Server *server, const std::string& channel, const std::string& message);
 	void sendCommandHelp(Server *server, const std::string& channel);
 	void sendUpTime(Server *server, const std::string& channel);
 	void sendRandomNumber(Server *server, const std::string& channel);

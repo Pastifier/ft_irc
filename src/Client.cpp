@@ -76,7 +76,7 @@ void Client::appendToBuffer(const std::string& data) {
 }
 
 /**
- * @brief This function is designed to handle newline delimiters used
+ * @brief This function is designed to hand` newline delimiters used
  * in network protocols, specifically IRC (which uses \r\n as the end-of-line marker).
  * @return std::string 
  */
@@ -91,8 +91,17 @@ std::string Client::getLine() {
 		if (pos != std::string::npos) {
 			line = _buffer.substr(0, pos);
 			_buffer = _buffer.substr(pos + 1);
+		} else {
+			// No complete line found, return empty string
+			return "";
 		}
 	}
+	
+	// Trim any trailing carriage returns
+	if (!line.empty() && line[line.length() - 1] == '\r') {
+		line = line.substr(0, line.length() - 1);
+	}
+	
 	return line;
 }
 
@@ -134,6 +143,25 @@ void Client::sendMessage(const std::string& message) {
 void Client::joinChannel(Channels *channel) {
 	if (std::find(_channels.begin(), _channels.end(), channel) == _channels.end()) {
 		_channels.push_back(channel);
+	}
+}
+
+/**
+ * @brief leave channel
+ * @param channel 
+ */
+
+void Client::leaveChannel(Channels *channel) {
+	if (!channel)
+		return;
+	std::vector<Channels *>::iterator it;
+	for (it = _channels.begin(); it != _channels.end(); ++it) {
+		if (*it == channel) {
+			_channels.erase(it);
+			if (channel->hasClient(this))
+				channel->removeClient(this);
+		}
+		break;
 	}
 }
 

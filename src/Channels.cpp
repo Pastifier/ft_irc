@@ -99,3 +99,30 @@ size_t Channels::getClientCount() const {
 std::vector<Client *> Channels::getOperators() const {
 	return _operators;
 }
+
+void Channels::addInvited(Client *client) {
+	if (!isInvited(client)) {
+		_invitedUsers.push_back(client);
+	}
+}
+
+void Channels::removeInvited(Client *client) {
+	for (std::vector<Client *>::iterator it = _invitedUsers.begin(); it != _invitedUsers.end(); ++it) {
+		if (*it == client) {
+			_invitedUsers.erase(it);
+			break;
+		}
+	}
+}
+
+bool Channels::isInvited(Client *client) const {
+	for (size_t i = 0; i < _invitedUsers.size(); ++i) {
+		if (_invitedUsers[i] == client)
+			return true;
+	}
+	return false;
+}
+
+std::vector<Client *> Channels::getInvitedUsers() const {
+	return _invitedUsers;
+}
