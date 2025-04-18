@@ -15,20 +15,19 @@ void IrcBot::initializeCommands() {
 }
 
 void IrcBot::initializeResponses() {
-	_greetings = {
-		"Hello!", 
-		"Hi there!", 
-		"Greetings!", 
-		"What's up?", 
-		"Nice to meet you!"
-	};
-	_jokes = {
-		"Why C programmers have trouble dating? Because they don't like to deal with classes.",
-		"Why did he C programmers break up with his girlfriends? Because she had too many issue with pointers.",
-		"C programmers never die.. They just get dereferenced.",
-		"How do Robots eat pizza? One byte at a time.",
-		"What is the object oriented way to become wealthy? Through inheritance."
-	};
+	_greetings.clear();
+	_greetings.push_back("Hello!");
+	_greetings.push_back("Hi there!");
+	_greetings.push_back("Greetings!");
+	_greetings.push_back("What's up?");
+	_greetings.push_back("Nice to meet you!");
+
+	_jokes.clear();
+	_jokes.push_back("Why C programmers have trouble dating? Because they don't like to deal with classes.");
+	_jokes.push_back("Why did the C programmer break up with his girlfriend? Because she had too many issues with pointers.");
+	_jokes.push_back("C programmers never die.. They just get dereferenced.");
+	_jokes.push_back("How do Robots eat pizza? One byte at a time.");
+	_jokes.push_back("What is the object oriented way to become wealthy? Through inheritance.");
 }
 
 void IrcBot::processMessage(Server *server, const std::string& channel, const std::string& sender, const std::string& message) {
@@ -48,14 +47,14 @@ void IrcBot::processMessage(Server *server, const std::string& channel, const st
 		sendPong(server, channel);
 	else if (trimmedMsg == "!deactivate" && sender == _masterNickName) {
 		_isActive = false;
-		sendMessage(server, channel, "Bot Deactivated!.");
+		sendMsg(server, channel, "Bot Deactivated!.");
 	}
 	else if (message.find(_botName) != std::string::npos) {
 		sendRandomGreeting(server, channel);
 	}
 }
 
-void IrcBot::sendMessage(Server *server, const std::string& channel, const std::string& message) {
+void IrcBot::sendMsg(Server *server, const std::string& channel, const std::string& message) {
 	std::string fullMessage = ":" + this->getNickName() + "!" + this->getUsername() + "@" +
 								this->getHostname() + " PRIVMSG " + channel + " :" + message + "\r\n";
 	Channels *targetChannel = server->findChannels(channel);
@@ -66,16 +65,16 @@ void IrcBot::sendMessage(Server *server, const std::string& channel, const std::
 		if (targetClient)
 			targetClient->sendMessage(fullMessage);
 		else {
-			this->sendMessage(server, this->getNickName(), "401 " + this->getNickName() + " "
+			this->sendMsg(server, this->getNickName(), "401 " + this->getNickName() + " "
 				+ channel + " :No such nick/channel");
 		}
 	}
 }
 
 void IrcBot::sendCommandHelp(Server *server, const std::string& channel) {
-	sendMessage(server, channel, "Available commands:");
+	sendMsg(server, channel, "Available commands:");
 	for (std::map<std::string, std::string>::iterator it = _commands.begin(); it != _commands.end(); ++it) {
-		sendMessage(server, channel, it->first + ": " + it->second);
+		sendMsg(server, channel, it->first + ": " + it->second);
 	}
 }
 
@@ -83,35 +82,35 @@ void IrcBot::sendUpTime(Server *server, const std::string& channel) {
 	time_t currentTime = time(NULL);
 	long uptime = currentTime - _startTime;
 	std::ostringstream uptimeMsg;
-	uptimeMsg << "I've benn running for "
+	uptimeMsg << "I've been running for "
 				<< uptime / 3600 << " hours, "
 				<< (uptime % 3600) / 60 << " minutes, "
 				<< uptime % 60 << " seconds.";
-	sendMessage(server, channel, uptimeMsg.str());
+	sendMsg(server, channel, uptimeMsg.str());
 }
 
 void IrcBot::sendRandomNumber(Server *server, const std::string& channel) {
 	int randomNum = rand() % 100 + 1; //Random no between 1-100
 	std::ostringstream randomMsg;
 	randomMsg << "Random number: " << randomNum;
-	sendMessage(server, channel, randomMsg.str());
+	sendMsg(server, channel, randomMsg.str());
 }
 
 void IrcBot::sendJoke(Server *server, const std::string& channel) {
 	if (!_jokes.empty()) {
 		int index = rand() % _jokes.size();
-		sendMessage(server, channel, _jokes[index]);
+		sendMsg(server, channel, _jokes[index]);
 	}
 }
 
 void IrcBot::sendPong(Server *server, const std::string& channel) {
-	sendMessage(server, channel, "Pong!");
+	sendMsg(server, channel, "Pong!");
 }
 
 void IrcBot::sendRandomGreeting(Server *server, const std::string& channel) {
 	if (!_greetings.empty()) {
 		int index = rand() % _greetings.size();
-		sendMessage(server, channel, _greetings[index]);
+		sendMsg(server, channel, _greetings[index]);
 	}
 }
 

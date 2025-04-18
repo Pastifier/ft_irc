@@ -2,6 +2,7 @@
 #include "Server.hpp"
 
 void User::execute(Server *server, Client *client, const std::string& params) {
+	(void)server;
 	if (client->isRegistered()) {
 		client->sendMessage(":server 462 " + client->getNickName() + " :You may not reregister");
 		return;

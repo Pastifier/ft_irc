@@ -26,7 +26,7 @@ void Part::execute(Server *server, Client *client, const std::string& params) {
 	while (std::getline(ss, channel, ',')) {
 		//removes all leading spaces from the channel string.
 		channel.erase(0, channel.find_first_not_of(" "));
-		channel.erase(channel.find_last_not_of(" "), 1);
+		channel.erase(channel.find_last_not_of(" ") + 1);
 		if (channel.empty() || channel[0] != '#') {
 			client->sendMessage(":Server 403 " + client->getNickName() + " " + channel + " :No such channel\r\n");
 			continue;

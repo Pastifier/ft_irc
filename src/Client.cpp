@@ -9,7 +9,12 @@ Client::Client(int socket)
 	: _socket(socket), _nickname("*"), _username(""), _hostname("localhost"), _realname(""),
 	_authenticated(false), _registered(false), _buffer(""), _isOperator(false) {}
 
-Client::~Client() {}
+Client::~Client() {
+	if (_socket >= 0) {
+		close(_socket);
+		_socket = -1;
+	}
+}
 
 void Client::setNickName(const std::string& nickname) {
 	_nickname = nickname;
@@ -91,8 +96,17 @@ std::string Client::getLine() {
 		if (pos != std::string::npos) {
 			line = _buffer.substr(0, pos);
 			_buffer = _buffer.substr(pos + 1);
+		} else {
+			// No complete line found, return empty string
+			return "";
 		}
 	}
+	
+	// Trim any trailing carriage returns
+	if (!line.empty() && line[line.length() - 1] == '\r') {
+		line = line.substr(0, line.length() - 1);
+	}
+	
 	return line;
 }
 
@@ -113,6 +127,8 @@ bool Client::hasCompleteLine() const {
  * @param message 
  */
 void Client::sendMessage(const std::string& message) {
+	if (_socket < 0)
+		return; //Silently return for virtual clients.
 	std::string formattedMessage = message;
 	if (formattedMessage.length() < 2 ||
 		formattedMessage.substr(formattedMessage.length() - 2) != "\r\n") {
@@ -134,6 +150,25 @@ void Client::sendMessage(const std::string& message) {
 void Client::joinChannel(Channels *channel) {
 	if (std::find(_channels.begin(), _channels.end(), channel) == _channels.end()) {
 		_channels.push_back(channel);
+	}
+}
+
+/**
+ * @brief leave channel
+ * @param channel 
+ */
+
+void Client::leaveChannel(Channels *channel) {
+	if (!channel)
+		return;
+	std::vector<Channels *>::iterator it;
+	for (it = _channels.begin(); it != _channels.end(); ++it) {
+		if (*it == channel) {
+			_channels.erase(it);
+			if (channel->hasClient(this))
+				channel->removeClient(this);
+			break;
+		}
 	}
 }
 

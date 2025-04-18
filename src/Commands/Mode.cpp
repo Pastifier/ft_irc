@@ -56,7 +56,7 @@ void Mode::execute(Server *server, Client *client, const std::string& params) {
 
 			return;
 		}
-		handleUserMode(server, client, target, modeString);
+		handleUserMode(server, client, modeString);
 	}
 }
 
@@ -68,7 +68,7 @@ void Mode::execute(Server *server, Client *client, const std::string& params) {
  * @param target 
  * @param modeString 
  */
-void Mode::handleUserMode(Server *server, Client *client, const std::string& target, const std::string& modeString) {
+void Mode::handleUserMode(Server *server, Client *client, const std::string& modeString) {
 	bool adding = true;
 	bool modeChanged = false;
 

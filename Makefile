@@ -1,6 +1,6 @@
 NAME = ircserv
 
-SRC = src/main.cpp
+SRC = $(wildcard src/*.cpp) $(wildcard src/Commands/*.cpp)
 
 INCLUDE_DIR := include/
 
