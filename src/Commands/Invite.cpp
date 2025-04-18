@@ -24,6 +24,7 @@ void Invite::execute(Server *server, Client *client, const std::string& params) 
 	}
 	if (!client->isInChannel(channel)) {
 		client->sendMessage(":server 442 " + client->getNickName() + " " + channelName + " :You're not on that channel");
+		return;
 	}
 	if (channel->isInviteOnly() && !channel->isOperator(client)) {
 		client->sendMessage(":server 482 " + client->getNickName() + " " + channelName + " :You're not channel operator");

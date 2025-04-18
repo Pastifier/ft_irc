@@ -62,7 +62,6 @@ void Join::execute(Server *server, Client *client, const std::string& params) {
 				continue;
 			}
 			if (!channel->getPassword().empty()) {
-				std::string providedkey = (i < keys.size()) ? keys[i] : "";
 				if (providedkey != channel->getPassword()) {
 					client->sendMessage(":server 475 " + client->getNickName() + " " + channelName + " :Cannot join channel (+k)");
 					continue;

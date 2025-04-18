@@ -58,6 +58,14 @@ void Dcc::receiveData(Client *clientSender, Client *clientReceiver, const std::s
 }
 
 void Dcc::execute(Server *server, Client *client, const std::string& params) {
+	//Clean up completed transfers first
+	for (std::map<std::string, FileTransfer>::iterator it = transfers.begin(); it != transfers.end();) {
+		if (it->second.completed)
+			it = transfers.erase(it);
+		else
+			++it;
+	}
+
 	//parse DCC command
 	std::istringstream iss(params);
 	std::string subCommand, targetNick, filename;

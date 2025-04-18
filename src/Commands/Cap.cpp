@@ -9,7 +9,7 @@ void Cap::handleCapList(Server *server, Client *client) {
 		}
 		capList += *it;
 	}
-	std::string response = ":" + server->getName() + " CAP " + client->getNickName() + " LS :" + capList + "\r\n";
+	std::string response = ":" + server->getName() + " CAP " + client->getNickName() + " LS :" + capList;
 	client->sendMessage(response);
 }
 
@@ -74,7 +74,7 @@ void Cap::execute(Server *server, Client *client, const std::string& params) {
 	}
 	//Convert subcommand to uppercase for case-insensitive matching
 	std::string subcommandUpper = subcommand;
-	for (std::string::iterator it = subcommandUpper.begin(); it != subcommand.end(); ++it) {
+	for (std::string::iterator it = subcommandUpper.begin(); it != subcommandUpper.end(); ++it) {
 		*it = toupper(*it);
 	}
 	if (subcommandUpper == "LS" || subcommandUpper == "LIST") {

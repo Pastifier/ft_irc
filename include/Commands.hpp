@@ -126,7 +126,7 @@ private:
 	void sendData(Client *clientSender, Client *clientReceiver, const std::string& filename);
 	void receiveData(Client *clientSender, Client *clientReceiver, const std::string& filename);
 public:
-	virtual void execute(Server *server, Client *cient, const std::string& params);
+	virtual void execute(Server *server, Client *client, const std::string& params);
 };
 
 class Cap: public Commands {

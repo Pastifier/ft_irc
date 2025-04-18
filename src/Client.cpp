@@ -76,7 +76,7 @@ void Client::appendToBuffer(const std::string& data) {
 }
 
 /**
- * @brief This function is designed to hand` newline delimiters used
+ * @brief This function is designed to handle newline delimiters used
  * in network protocols, specifically IRC (which uses \r\n as the end-of-line marker).
  * @return std::string 
  */
@@ -160,8 +160,8 @@ void Client::leaveChannel(Channels *channel) {
 			_channels.erase(it);
 			if (channel->hasClient(this))
 				channel->removeClient(this);
+			break;
 		}
-		break;
 	}
 }
 

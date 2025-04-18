@@ -23,7 +23,7 @@ void Notice::execute(Server *server, Client *client, const std::string& params) 
 	if (messageText.empty())
 		return;
 	std::string formattedMessage = ":" + client->getNickName() + "!" + client->getUsername() + "@" +
-			client->getHostname() + + " NOTICE " + target + " :" + messageText;
+			client->getHostname() + " NOTICE " + target + " :" + messageText;
 	//check if target is channel
 	if (target[0] == '#' || target[0] == '&') {
 		Channels *channel = server->findChannels(target);
