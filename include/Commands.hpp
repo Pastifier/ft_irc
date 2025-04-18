@@ -120,6 +120,11 @@ public:
 	virtual void execute(Server *server, Client *client, const std::string& params);
 };
 
+class CreateBot:public Commands {
+public:
+	virtual void execute(Server *server, Client *client, const std::string& params);
+};
+
 class Dcc: public Commands {
 private:
 	std::map<std::string, FileTransfer> transfers;

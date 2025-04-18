@@ -82,7 +82,7 @@ void IrcBot::sendUpTime(Server *server, const std::string& channel) {
 	time_t currentTime = time(NULL);
 	long uptime = currentTime - _startTime;
 	std::ostringstream uptimeMsg;
-	uptimeMsg << "I've benn running for "
+	uptimeMsg << "I've been running for "
 				<< uptime / 3600 << " hours, "
 				<< (uptime % 3600) / 60 << " minutes, "
 				<< uptime % 60 << " seconds.";

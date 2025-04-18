@@ -122,6 +122,8 @@ bool Client::hasCompleteLine() const {
  * @param message 
  */
 void Client::sendMessage(const std::string& message) {
+	if (_socket < 0)
+		return; //Silently return for virtual clients.
 	std::string formattedMessage = message;
 	if (formattedMessage.length() < 2 ||
 		formattedMessage.substr(formattedMessage.length() - 2) != "\r\n") {

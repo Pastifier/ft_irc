@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "IrcBot.hpp"
 
 Server::Server(int port, const std::string& password)
     : _serverSocket(NULL),
@@ -74,6 +75,9 @@ void Server::registerCommands() {
     _commands["HELP"] = new Help();
     _commands["PING"] = new Ping();
     _commands["OPER"] = new Oper();
+	_commands["BOT"] = new Bot();
+	_commands["CREATEBOT"] = new CreateBot();
+	_commands["DCC"] = new Dcc();
 }
 
 void Server::initialize() {
@@ -246,7 +250,8 @@ void Server::handleClientData(size_t clientIndex)
 		return;
 	}
 	int clientSocket = client->getSocket();
-
+	if (clientSocket < 0)
+		return; //skip processing for virtual client (Bot).
 	char buffer[4096];
 	memset(buffer, 0, sizeof(buffer));
 	int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
@@ -406,4 +411,31 @@ const std::vector<Client*>& Server::getClients() const {
 
 const std::map<std::string, Channels*>& Server::getChannelss() const {
     return _Channelss;
+}
+
+/**
+ * @brief Bot related method expansion
+ */
+
+IrcBot *Server::findBot(const std::string& botName) {
+	std::vector<Client*>::const_iterator it;
+	for (it = _clients.begin(); it != _clients.end(); ++it) {
+		IrcBot *bot = dynamic_cast<IrcBot *>(*it);
+		if (bot != NULL && bot->getBotName() == botName)
+			return bot;
+	}
+	return NULL;
+}
+
+IrcBot *Server::createBot(const std::string &botName, const std::string &masterNick) {
+	IrcBot *bot = new IrcBot(-1, botName); //using -1 to indicate this is a virtual client so we dont have to create another socket.
+	bot->setNickName(botName);
+	bot->setUsername(botName);
+	bot->setHostname("localhost");
+	bot->setRealname("IRC Bot");
+	bot->setMasterNickname(masterNick);
+
+	//Register the client
+	_clients.push_back(bot);
+	return bot;
 }

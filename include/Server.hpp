@@ -13,6 +13,8 @@
 
 #include "printing.hpp"
 
+class IrcBot;
+
 class Server {
 public:
     Server(int port, const std::string& password = "");
@@ -49,6 +51,12 @@ public:
     const std::string& getPassword() const;
     const std::vector<Client*>& getClients() const;
     const std::map<std::string, Channels*>& getChannelss() const;
+
+	/**
+	 * @brief Bot related method
+	 */
+	IrcBot *findBot(const std::string& botName);
+	IrcBot *createBot(const std::string& botName, const std::string& masterNick);
 
 private:
     Socket* _serverSocket;
