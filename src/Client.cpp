@@ -9,7 +9,12 @@ Client::Client(int socket)
 	: _socket(socket), _nickname("*"), _username(""), _hostname("localhost"), _realname(""),
 	_authenticated(false), _registered(false), _buffer(""), _isOperator(false) {}
 
-Client::~Client() {}
+Client::~Client() {
+	if (_socket >= 0) {
+		close(_socket);
+		_socket = -1;
+	}
+}
 
 void Client::setNickName(const std::string& nickname) {
 	_nickname = nickname;
