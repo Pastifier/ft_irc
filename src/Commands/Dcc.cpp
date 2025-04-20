@@ -8,7 +8,7 @@ void Dcc::sendData(Client *clientSender, Client *clientReceiver, const std::stri
 	transfer.recipient = clientReceiver->getNickName();
 	transfer.completed = false;
 
-	std::ifstream file(filename, std::ios::binary);
+	std::ifstream file(filename.c_str(), std::ios::binary);
 	if (file) {
 		//Read file content into the transfer data buffer
 		transfer.data = std::vector<char>(
