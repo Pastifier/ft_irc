@@ -17,11 +17,14 @@ void Dcc::sendData(Client *clientSender, Client *clientReceiver, const std::stri
 		);
 		//store transfer in the map
 		transfers[filename] = transfer;
+		// Conversion
+		std::stringstream mid;
+		mid << transfer.data.size();
 		//notify the receiver about the file offer
 		std::string message = ":" + clientSender->getNickName() +
 			" NOTICE " + clientReceiver->getNickName() +
 			" :DCC SEND " + filename + " " +
-			std::to_string(transfer.data.size()) + " bytes";
+			mid.str() + " bytes";
 		clientReceiver->sendMessage(message);
 		clientSender->sendMessage(":server NOTICE " + clientSender->getNickName() +
 			" :DCC SEND offer sent to " + clientReceiver->getNickName());
@@ -48,9 +51,12 @@ void Dcc::receiveData(Client *clientSender, Client *clientReceiver, const std::s
 	}
 	transfer.completed = true;
 	//notify receiver
+	// Conversion
+	std::stringstream mid;
+	mid << transfer.data.size();
 	std::string message = ":server NOTICE " + clientReceiver->getNickName() +
 		" :DCC GET complete - " + filename + "  (" +
-		std::to_string(transfer.data.size()) + " bytes )";
+		mid.str() + " bytes )";
 	clientReceiver->sendMessage(message);
 	//notify sender
 	clientSender->sendMessage(":server NOTICE " + clientSender->getNickName() +
@@ -59,11 +65,16 @@ void Dcc::receiveData(Client *clientSender, Client *clientReceiver, const std::s
 
 void Dcc::execute(Server *server, Client *client, const std::string& params) {
 	//Clean up completed transfers first
-	for (std::map<std::string, FileTransfer>::iterator it = transfers.begin(); it != transfers.end();) {
-		if (it->second.completed)
-			it = transfers.erase(it);
-		else
-			++it;
+	for (std::map<std::string, FileTransfer>::iterator it = transfers.begin(); it != transfers.end(); ++it) {
+		if (it->second.completed) {
+			std::map<std::string, FileTransfer>::iterator temp = it;
+			// temp->second.~FileTransfer();
+			transfers.erase(temp);
+			// it = transfers.erase(it);
+		}
+		// else
+		// 	++it;
+		// ++it;
 	}
 
 	//parse DCC command

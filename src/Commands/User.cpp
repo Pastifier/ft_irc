@@ -22,7 +22,9 @@ void User::execute(Server *server, Client *client, const std::string& params) {
 	realname = params.substr(realnamePos + 1);
 	client->setUsername(username);
 	if (hostname == "0") {
-		std::string actuaHostname = "client_" + std::to_string(client->getSocket());
+		std::stringstream mid;
+		mid << client->getSocket();
+		std::string actuaHostname = "client_" + mid.str();
 		client->setHostname(actuaHostname);
 	} else {
 		client->setHostname(hostname);
