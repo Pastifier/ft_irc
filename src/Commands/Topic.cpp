@@ -27,7 +27,7 @@ void Topic::execute(Server *server, Client *client, const std::string& params) {
 		if (topicText[0] == ':')
 			topicText = topicText.substr(1);
 		if (channel->isTopicRestricted() && !channel->isOperator(client)) {
-			client->sendMessage(":server 482 " + client->getNickName() + " " + channelName + " :You''re not channel operator");
+			client->sendMessage(":server 482 " + client->getNickName() + " " + channelName + " :You're not channel operator");
 			return;
 		}
 		channel->setTopic(topicText);

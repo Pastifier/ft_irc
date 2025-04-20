@@ -110,7 +110,7 @@ public:
 			"Register using below commands:\n"
 			"PASS [Server Password]\n"
 			"NICK [your nickname]\n"
-			"[USER sbartoul * *:Suraj Bartoula] or [USER sbartoul 0 *:Suraj Bartoula]\n";
+			"USER [username] * * :[realname] or USER [username] 0 * :[real name]\n";
 	}
 	virtual void execute(Server *server, Client *client, const std::string& params);
 };

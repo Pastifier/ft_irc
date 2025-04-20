@@ -29,6 +29,7 @@ void Nick::execute(Server *server, Client *client, const std::string& params) {
 	}
 	if (!server->isNicknameAvailable(nickname)) {
 		client->sendMessage(":server 433 " + client->getNickName() + " " + nickname + " :Nickname is already in use");
+		return;
 	}
 	std::string oldNickname = client->getNickName();
 	client->setNickName(nickname);

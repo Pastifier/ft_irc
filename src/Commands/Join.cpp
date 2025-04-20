@@ -50,6 +50,8 @@ void Join::execute(Server *server, Client *client, const std::string& params) {
 				client->sendMessage(":server 403 " + client->getNickName() + " " + channelName + " :Cannot create channel");
 				continue;
 			}
+			client->joinChannel(channel);
+			channel->addClient(client);
 			//make the first user a channel operator
 			channel->addOperator(client);
 		} else {

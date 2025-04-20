@@ -44,7 +44,7 @@ void Cap::handleCapRequest(Server *server, Client *client, const std::string& ca
 			ackList += " ";
 		ackList += *it;
 	}
-	std::string responses = ":" + server->getName() + " CAP " + client->getNickName() + " ACK :" + ackList + "\r\n";
+	std::string responses = ":" + server->getName() + " CAP " + client->getNickName() + " ACK :" + ackList;
 	client->sendMessage(responses);
 }
 
@@ -58,7 +58,7 @@ void Cap::handleCapEnd(Server *server, Client *client) {
 }
 
 void Cap::handleCapClear(Server *server, Client *client) {
-	std::string response = ":" + server->getName() + " CAP " + client->getNickName() + " ACK :*\r\n";
+	std::string response = ":" + server->getName() + " CAP " + client->getNickName() + " ACK :*";
 	client->sendMessage(response);
 }
 
@@ -86,7 +86,7 @@ void Cap::execute(Server *server, Client *client, const std::string& params) {
 	} else if (subcommandUpper == "CLEAR") {
 		handleCapClear(server, client);
 	} else {
-		std::string response = ":" + server->getName() + " 410 " + client->getNickName() + " :Unknown CAP subcommand: " + subcommand + "\r\n";
+		std::string response = ":" + server->getName() + " 410 " + client->getNickName() + " :Unknown CAP subcommand: " + subcommand;
 		client->sendMessage(response);
 	}
 }

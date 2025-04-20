@@ -201,6 +201,11 @@ void Server::executeCommand(Client *client, const std::string& command, const st
 		client->sendMessage(response);
 		return;
 	}
+	if (client->getNickName() == "*" && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT" && command != "HELP") {
+		std::string response = ":server 451 * :You have not registered. Type HELP to learn how to register\r\n";
+		client->sendMessage(response);
+		return;
+	}
 	try {
 		it->second->execute(this, client, params);
 	} catch (const std::exception& e) {

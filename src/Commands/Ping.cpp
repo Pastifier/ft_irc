@@ -8,6 +8,7 @@ void Ping::execute(Server *server, Client *client, const std::string& params) {
 	}
 	if (params.empty()) {
 		client->sendMessage(":server 409 " + client->getNickName() + " :No origin specified");
+		return;
 	}
 	std::istringstream iss(params);
 	std::string origin;
