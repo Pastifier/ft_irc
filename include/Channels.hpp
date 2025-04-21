@@ -13,15 +13,24 @@ private:
 	std::string _name;
 	std::string _topic;
 	std::string _password;
+	unsigned int _userLimit; //Maximum number of clients allowed in the channel.
+	bool _invite_only; //Can join the channel only if invitation is sent.
+	bool _topicRestricted; //Who can change the topic
+	// bool _has_topic;
 	std::vector<Client *> _clients;
 	std::vector<Client *> _operators;
-	bool _has_topic;
-	bool _topicRestricted; //Who can change the topic
-	bool _invite_only; //Can join the channel only if invitation is sent.
-	unsigned int _userLimit; //Maximum number of clients allowed in the channel.
+	std::vector<Client *> _invitedUsers;
 public:
 	Channels(const std::string& name);
 	~Channels();
+
+	/**
+	 * @brief Methods to handle invited users
+	 */
+	void addInvited(Client *client);
+	void removeInvited(Client *client);
+	bool isInvited(Client *client) const;
+	std::vector<Client *> getInvitedUsers() const;
 
 	/**
 	 * @brief Getters/Setters

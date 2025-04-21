@@ -19,10 +19,10 @@ private:
 	std::string _username;
 	std::string _hostname;
 	std::string _realname;
-	bool _isOperator;
 	bool _authenticated;
 	bool _registered;
 	std::string _buffer;
+	bool _isOperator;
 	std::vector<Channels *> _channels;
 public:
 	Client(int socket);
@@ -65,5 +65,5 @@ public:
 	/**
 	 * @brief Message Handling
 	 */
-	virtual void sendMessage(const std::string& message);
+	void sendMessage(const std::string& message);
 };

@@ -10,7 +10,7 @@ void Quit::execute(Server *server, Client *client, const std::string& params) {
 	std::string quitNotification = ":" + client->getNickName() +
 									"!" + client->getUsername() +
 									"@" + client->getHostname() +
-									" QUIT : " + quitMessage;
+									" QUIT :" + quitMessage;
 	std::vector<Channels *> channels = client->getChannels();
 	for (std::vector<Channels *>::iterator it = channels.begin(); it != channels.end(); ++it) {
 		server->sendToChannel(*it, quitNotification, NULL);
