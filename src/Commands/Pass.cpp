@@ -8,7 +8,7 @@ void Pass::execute(Server *server, Client *client, const std::string& params) {
 	}
 	//Check if password is provided
 	if (params.empty()) {
-		client->sendMessage(":server 461 " + client->getNickName() + " PASS :Not enought parameters");
+		client->sendMessage(":server 461 " + client->getNickName() + " PASS :Not enough parameters");
 		return;
 	}
 	//Extract passwod (may have a prefix ":")

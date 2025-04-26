@@ -64,17 +64,15 @@ void Dcc::receiveData(Client *clientSender, Client *clientReceiver, const std::s
 }
 
 void Dcc::execute(Server *server, Client *client, const std::string& params) {
-	//Clean up completed transfers first
-	for (std::map<std::string, FileTransfer>::iterator it = transfers.begin(); it != transfers.end(); ++it) {
+	std::map<std::string, FileTransfer>::iterator it = transfers.begin();
+	while (it != transfers.end()) {
 		if (it->second.completed) {
 			std::map<std::string, FileTransfer>::iterator temp = it;
-			// temp->second.~FileTransfer();
+			++it; //advance iterator before erasing
 			transfers.erase(temp);
-			// it = transfers.erase(it);
+		} else {
+			++it; //normal iterate if no need to erase
 		}
-		// else
-		// 	++it;
-		// ++it;
 	}
 
 	//parse DCC command

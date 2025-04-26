@@ -42,9 +42,13 @@ int main(int argc, char *argv[]) {
 	if (port == -1 || !is_valid_password(pass))
 		return 1;
 	try {
+		signal(SIGINT, &Server::signal_handler);
+		signal(SIGQUIT, &Server::signal_handler);
 		Server server(port, pass);
+		g_server = &server;
 		server.initialize();
 		server.run();
+		g_server = NULL;
 	} catch(const std::exception& e) {
 		std::cerr << e.what() << std::endl;
 		return 1;

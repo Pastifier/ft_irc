@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "IrcBot.hpp"
 
+Server *g_server = NULL;
+
 Server::Server(int port, const std::string& password)
     : _serverSocket(NULL),
       _pollfds(NULL),
@@ -56,6 +58,16 @@ Server::~Server() {
 
     delete _serverSocket;
     delete[] _pollfds;
+}
+
+void Server::shutdown() {
+	_running = false;
+}
+
+void Server::signal_handler(int signum) {
+	(void)signum;
+	if (g_server)
+		g_server->shutdown();
 }
 
 void Server::registerCommands() {
@@ -128,6 +140,8 @@ void Server::run() {
         _preparePollArray();
 
         int activity = poll(_pollfds, _pollfdCount, -1);
+		if (!_running)
+			break;
 
         if (activity < 0) {
             std::cerr << "Poll error: " << strerror(errno) << std::endl;
@@ -178,6 +192,8 @@ void Server::handleNewConnection() {
 			std::string clientIp = clientSocket->getIpAddress();
             Client *client = new Client(clientfd);
 			client->setHostname(clientIp);
+			clientSocket->setInvalid();
+			delete clientSocket;
 			registerClient(client);
         }
     }

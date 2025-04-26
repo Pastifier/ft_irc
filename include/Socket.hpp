@@ -43,6 +43,10 @@ public:
             close(_fd);
     }
 
+	void setInvalid() {
+		_fd = -1;
+	}
+
     void bind(int port) {
         _address.sin_family = AF_INET;
         _address.sin_addr.s_addr = INADDR_ANY;
@@ -105,12 +109,8 @@ public:
     }
 
     void setNonBlocking() {
-        int flags = fcntl(_fd, F_GETFL, 0);
-        if (flags < 0)
-            throw std::runtime_error("Failed to get socket flags: " + std::string(strerror(errno)));
-            
-        if (fcntl(_fd, F_SETFL, flags | O_NONBLOCK) < 0)
-            throw std::runtime_error("Failed to set non-blocking mode: " + std::string(strerror(errno)));
+		if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0)
+			throw std::runtime_error("Failed to set non-blocking mode: " + std::string(strerror(errno)));
     }
     
     int getFd() const {
