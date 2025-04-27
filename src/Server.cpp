@@ -90,6 +90,7 @@ void Server::registerCommands() {
 	_commands["BOT"] = new Bot();
 	_commands["CREATEBOT"] = new CreateBot();
 	_commands["DCC"] = new Dcc();
+	_commands["WHOIS"] = new Whois();
 }
 
 void Server::initialize() {
@@ -176,9 +177,6 @@ void Server::run() {
 				}
             }
         }
-        
-        // Perform any scheduled tasks (like bot actions)
-        performScheduledTasks();
     }
 }
 
@@ -403,11 +401,6 @@ void Server::broadcastMessage(const std::string& message) {
 		if (*it)
 			(*it)->sendMessage(message);
 	}
-}
-
-void Server::performScheduledTasks()
-{
-    // Placeholder for scheduled tasks like bot actions
 }
 
 bool Server::isValidPassword(const std::string& password) const {
