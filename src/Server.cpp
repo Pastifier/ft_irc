@@ -209,7 +209,7 @@ void Server::executeCommand(Client *client, const std::string& command, const st
 		client->sendMessage(response);
 		return;
 	}
-	if (!client->isAuthenticated() && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT") {
+	if (!client->isAuthenticated() && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT" && command != "CAP") {
 		std::string response = ":server 464 " + (client->isRegistered() ? client->getNickName(): "*") +
 			" :Password required\r\n";
 		client->sendMessage(response);
