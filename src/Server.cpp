@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "IrcBot.hpp"
 
+Server *g_server = NULL;
+
 Server::Server(int port, const std::string& password)
     : _serverSocket(NULL),
       _pollfds(NULL),
@@ -58,6 +60,16 @@ Server::~Server() {
     delete[] _pollfds;
 }
 
+void Server::shutdown() {
+	_running = false;
+}
+
+void Server::signal_handler(int signum) {
+	(void)signum;
+	if (g_server)
+		g_server->shutdown();
+}
+
 void Server::registerCommands() {
     _commands["PASS"] = new Pass();
     _commands["NICK"] = new Nick();
@@ -78,6 +90,7 @@ void Server::registerCommands() {
 	_commands["BOT"] = new Bot();
 	_commands["CREATEBOT"] = new CreateBot();
 	_commands["DCC"] = new Dcc();
+	_commands["WHOIS"] = new Whois();
 }
 
 void Server::initialize() {
@@ -128,6 +141,8 @@ void Server::run() {
         _preparePollArray();
 
         int activity = poll(_pollfds, _pollfdCount, -1);
+		if (!_running)
+			break;
 
         if (activity < 0) {
             std::cerr << "Poll error: " << strerror(errno) << std::endl;
@@ -162,9 +177,6 @@ void Server::run() {
 				}
             }
         }
-        
-        // Perform any scheduled tasks (like bot actions)
-        performScheduledTasks();
     }
 }
 
@@ -178,6 +190,8 @@ void Server::handleNewConnection() {
 			std::string clientIp = clientSocket->getIpAddress();
             Client *client = new Client(clientfd);
 			client->setHostname(clientIp);
+			clientSocket->setInvalid();
+			delete clientSocket;
 			registerClient(client);
         }
     }
@@ -195,7 +209,7 @@ void Server::executeCommand(Client *client, const std::string& command, const st
 		client->sendMessage(response);
 		return;
 	}
-	if (!client->isAuthenticated() && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT") {
+	if (!client->isAuthenticated() && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT" && command != "CAP") {
 		std::string response = ":server 464 " + (client->isRegistered() ? client->getNickName(): "*") +
 			" :Password required\r\n";
 		client->sendMessage(response);
@@ -387,11 +401,6 @@ void Server::broadcastMessage(const std::string& message) {
 		if (*it)
 			(*it)->sendMessage(message);
 	}
-}
-
-void Server::performScheduledTasks()
-{
-    // Placeholder for scheduled tasks like bot actions
 }
 
 bool Server::isValidPassword(const std::string& password) const {

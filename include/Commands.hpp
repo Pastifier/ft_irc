@@ -150,3 +150,8 @@ public:
 
 	virtual void execute(Server *server, Client *client, const std::string& params);
 };
+
+class Whois: public Commands {
+public:
+	virtual void execute(Server *server, Client *client, const std::string& params);
+};

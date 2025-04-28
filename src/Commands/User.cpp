@@ -39,7 +39,7 @@ void User::execute(Server *server, Client *client, const std::string& params) {
 		client->sendMessage(yourHost);
 		std::string created = ":server 003 " + client->getNickName() + " :This server was created sometime";
 		client->sendMessage(created);
-		std::string myInfo = ":server 004 " + client->getNickName() + " :server 1.0 o o";
+		std::string myInfo = ":server 004 " + client->getNickName() + " :server 1.0";
 		client->sendMessage(myInfo);
 	}
 }

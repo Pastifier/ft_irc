@@ -6,6 +6,7 @@
 #include <map>
 #include <poll.h>
 #include <algorithm>
+#include <signal.h>
 #include "Socket.hpp"
 #include "Client.hpp"
 #include "Channels.hpp"
@@ -15,6 +16,8 @@
 
 class IrcBot;
 
+extern Server *g_server;
+
 class Server {
 public:
     Server(int port, const std::string& password = "");
@@ -22,6 +25,10 @@ public:
     
     void initialize();
     void run();
+
+	//Sigint and sigquit handler
+	void shutdown();
+	static void signal_handler(int signum);
     
     void handleNewConnection();
     void handleClientData(size_t clientIndex);
