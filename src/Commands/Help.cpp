@@ -7,6 +7,6 @@ void Help::execute(Server *server, Client *client, const std::string& params) {
 	std::istringstream helpstream(_registrationHelp);
 	std::string line;
 	while (std::getline(helpstream, line)) {
-		client->sendMessage(line);
+		client->enqueueMessage(line);
 	}
 }

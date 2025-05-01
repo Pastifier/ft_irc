@@ -7,8 +7,8 @@ void Bot::execute(Server *server, Client *client, const std::string& params) {
 	std::string botName, channel, message;
 
 	if (!(iss >> botName >> channel)) {
-		client->sendMessage(":Server 461 * BOT :Not enough parameters\r\n");
-		client->sendMessage(":Server 461 * BOT :Usage: BOT <botname> <channel> <message>\r\n");
+		client->enqueueMessage(":Server 461 * BOT :Not enough parameters\r\n");
+		client->enqueueMessage(":Server 461 * BOT :Usage: BOT <botname> <channel> <message>\r\n");
 		return;
 	}
 	std::getline(iss >> std::ws, message);
@@ -18,7 +18,7 @@ void Bot::execute(Server *server, Client *client, const std::string& params) {
 	//Find the bot by name
 	IrcBot *bot = server->findBot(botName);
 	if (bot == NULL) {
-		client->sendMessage(":Server 403 * " + botName + " :Bot not found\r\n");
+		client->enqueueMessage(":Server 403 * " + botName + " :Bot not found\r\n");
 		return;
 	}
 	bot->processMessage(server, channel, client->getNickName(), message);

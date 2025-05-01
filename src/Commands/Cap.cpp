@@ -10,7 +10,7 @@ void Cap::handleCapList(Server *server, Client *client) {
 		capList += *it;
 	}
 	std::string response = ":" + server->getName() + " CAP " + client->getNickName() + " LS :" + capList;
-	client->sendMessage(response);
+	client->enqueueMessage(response);
 }
 
 void Cap::handleCapRequest(Server *server, Client *client, const std::string& capsRequested) {
@@ -45,7 +45,7 @@ void Cap::handleCapRequest(Server *server, Client *client, const std::string& ca
 		ackList += *it;
 	}
 	std::string responses = ":" + server->getName() + " CAP " + client->getNickName() + " ACK :" + ackList;
-	client->sendMessage(responses);
+	client->enqueueMessage(responses);
 }
 
 void Cap::handleCapEnd(Server *server, Client *client) {
@@ -53,13 +53,13 @@ void Cap::handleCapEnd(Server *server, Client *client) {
 		client->setRegistered(true);
 		std::string welcomeMsg = ":" + server->getName() + " 001 " + client->getNickName() + " :Welcome to the Internet Relay Network " +
 				client->getNickName() + "!" + client->getUsername() + "@" + client->getHostname() + "\r\n";
-		client->sendMessage(welcomeMsg);
+		client->enqueueMessage(welcomeMsg);
 	}
 }
 
 void Cap::handleCapClear(Server *server, Client *client) {
 	std::string response = ":" + server->getName() + " CAP " + client->getNickName() + " ACK :*";
-	client->sendMessage(response);
+	client->enqueueMessage(response);
 }
 
 void Cap::execute(Server *server, Client *client, const std::string& params) {
@@ -87,6 +87,6 @@ void Cap::execute(Server *server, Client *client, const std::string& params) {
 		handleCapClear(server, client);
 	} else {
 		std::string response = ":" + server->getName() + " 410 " + client->getNickName() + " :Unknown CAP subcommand: " + subcommand;
-		client->sendMessage(response);
+		client->enqueueMessage(response);
 	}
 }

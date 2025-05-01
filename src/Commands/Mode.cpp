@@ -3,13 +3,13 @@
 
 void Mode::execute(Server *server, Client *client, const std::string& params) {
 	if (!client->isRegistered()) {
-		client->sendMessage(":server 451 :You have not registered");
+		client->enqueueMessage(":server 451 :You have not registered");
 		return;
 	}
 	std::istringstream iss(params);
 	std::string target, modeString, modeParams;
 	if (!(iss >> target)) {
-		client->sendMessage(":server 461 " + client->getNickName() + " MODE :Not enough parameters");
+		client->enqueueMessage(":server 461 " + client->getNickName() + " MODE :Not enough parameters");
 		return;
 	}
 	iss >> modeString;
@@ -23,7 +23,7 @@ void Mode::execute(Server *server, Client *client, const std::string& params) {
 	if (target[0] == '#' || target[0] == '&') {
 		Channels *channel = server->findChannels(target);
 		if (!channel) {
-			client->sendMessage(":server 403 " + client->getNickName() + " " + target + " :No such channel");
+			client->enqueueMessage(":server 403 " + client->getNickName() + " " + target + " :No such channel");
 			return;
 		}
 		//If command is --> MODE #channel then the response will be :server 324 User123 #channel +itkl
@@ -38,13 +38,13 @@ void Mode::execute(Server *server, Client *client, const std::string& params) {
 				modes += "k";
 			if (channel->getUserLimit() > 0)
 				modes += "l";
-			client->sendMessage(":server 324 " + client->getNickName() + " " + target + " " + modes);
+			client->enqueueMessage(":server 324 " + client->getNickName() + " " + target + " " + modes);
 			return;
 		}
 		handleChannelMode(server, client, channel, modeString, modeParams);
 	} else {
 		if (target != client->getNickName()) {
-			client->sendMessage(":server 502 " + client->getNickName() + " :Cannot change mode for other users");
+			client->enqueueMessage(":server 502 " + client->getNickName() + " :Cannot change mode for other users");
 			//:server 502 User123 :Cannot change mode for other users
 			return;
 		}
@@ -52,7 +52,7 @@ void Mode::execute(Server *server, Client *client, const std::string& params) {
 			std::string modes = "+";
 			if (client->isOperator())
 				modes += "o";
-			client->sendMessage(":server 221 " + client->getNickName() + " " + modes); //:server 221 User123 +o
+			client->enqueueMessage(":server 221 " + client->getNickName() + " " + modes); //:server 221 User123 +o
 
 			return;
 		}
@@ -84,7 +84,7 @@ void Mode::handleUserMode(Server *server, Client *client, const std::string& mod
 				client->setOperator(false);
 				modeChanged = true;
 			} else if (adding)
-				client->sendMessage(":server 472 " + client->getNickName() + " o :Cannot set mode +o on self");
+				client->enqueueMessage(":server 472 " + client->getNickName() + " o :Cannot set mode +o on self");
 		}
 	}
 	if (modeChanged) {
@@ -105,7 +105,7 @@ void Mode::handleUserMode(Server *server, Client *client, const std::string& mod
 void Mode::handleChannelMode(Server *server, Client *client, Channels *channel, const std::string& modeString, const std::string& modeParams) {
 	//Neither a channel operator nor a global server operator | handleChannelMode(server, client, channel, "+i", "");
 	if (!channel->isOperator(client) && !client->isOperator()) {
-		client->sendMessage(":server 482 " + client->getNickName() + " " + channel->getName() + " :You're not channel operator");
+		client->enqueueMessage(":server 482 " + client->getNickName() + " " + channel->getName() + " :You're not channel operator");
 		return;
 	}
 	bool adding = true;
@@ -148,7 +148,7 @@ void Mode::handleChannelMode(Server *server, Client *client, Channels *channel, 
 						effectiveParams += " " + currentParam;
 						modeChanged = true;
 					} else {
-						client->sendMessage(":server 461 " + client->getNickName() + "MODE :Not enough parameters");
+						client->enqueueMessage(":server 461 " + client->getNickName() + "MODE :Not enough parameters");
 					}
 				} else { // If the mode is being removed (-k)
 					channel->setPassword("");
@@ -167,10 +167,10 @@ void Mode::handleChannelMode(Server *server, Client *client, Channels *channel, 
 							effectiveParams += " " + currentParam;
 							modeChanged = true;
 						} else {
-							client->sendMessage(":server 461 " + client->getNickName() + " MODE :Invalid user limit");
+							client->enqueueMessage(":server 461 " + client->getNickName() + " MODE :Invalid user limit");
 						}
 					} else {
-						client->sendMessage(":server 461 " + client->getNickName() + "MODE :Not enough parameters");
+						client->enqueueMessage(":server 461 " + client->getNickName() + "MODE :Not enough parameters");
 					}
 				} else {
 					channel->setUserLimit(0);
@@ -191,11 +191,11 @@ void Mode::handleChannelMode(Server *server, Client *client, Channels *channel, 
 						effectiveParams += " " + currentParam;
 						modeChanged = true;
 					} else {
-						client->sendMessage(":server 441 " + client->getNickName() + " " + currentParam + " " +
+						client->enqueueMessage(":server 441 " + client->getNickName() + " " + currentParam + " " +
 							channel->getName() + " :They aren't on that channel");
 					}
 				} else {
-					client->sendMessage(":server 461 " + client->getNickName() + " MODE :Not enough parameters");
+					client->enqueueMessage(":server 461 " + client->getNickName() + " MODE :Not enough parameters");
 				}
 				break;
 			default:

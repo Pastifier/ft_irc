@@ -3,13 +3,13 @@
 
 void Privmsg::execute(Server *server, Client *client, const std::string& params) {
 	if (!client->isRegistered()) {
-		client->sendMessage(":server 451 " + client->getNickName() + " :You have not registered");
+		client->enqueueMessage(":server 451 " + client->getNickName() + " :You have not registered");
 		return;
 	}
 	std::istringstream iss(params);
 	std::string target, messageText;
 	if (!(iss >> target)) {
-		client->sendMessage(":server 411 " + client->getNickName() + " :No recipient given (PRIVMSG)");
+		client->enqueueMessage(":server 411 " + client->getNickName() + " :No recipient given (PRIVMSG)");
 		return;
 	}
 	size_t msgPos = params.find_first_of(' ');
@@ -18,11 +18,11 @@ void Privmsg::execute(Server *server, Client *client, const std::string& params)
 		if (messageText[0] == ':')
 			messageText = messageText.substr(1);
 	} else {
-		client->sendMessage(":server 412 " + client->getNickName() + " :No text to send");
+		client->enqueueMessage(":server 412 " + client->getNickName() + " :No text to send");
 		return;
 	}
 	if (messageText.empty()) {
-		client->sendMessage(":server 412 " + client->getNickName() + " :No text to send");
+		client->enqueueMessage(":server 412 " + client->getNickName() + " :No text to send");
 		return;
 	}
 	std::string formattedMessage = ":" + client->getNickName() + "!" + client->getUsername() + "@" +
@@ -30,20 +30,20 @@ void Privmsg::execute(Server *server, Client *client, const std::string& params)
 	if (target[0] == '#' || target[0] == '&') {
 		Channels *channel = server->findChannels(target);
 		if (!channel) {
-			client->sendMessage(":server 401 " + client->getNickName() + " " + target + " :No such nick/channel");
+			client->enqueueMessage(":server 401 " + client->getNickName() + " " + target + " :No such nick/channel");
 			return;
 		}
 		if (!client->isInChannel(channel)) {
-			client->sendMessage(":server 404 " + client->getNickName() + " " + target + " :Cannot send to channel");
+			client->enqueueMessage(":server 404 " + client->getNickName() + " " + target + " :Cannot send to channel");
 			return;
 		}
 		server->sendToChannel(channel, formattedMessage, client);
 	} else {
 		Client *targetClient = server->findClientByNickname(target);
 		if (!targetClient) {
-			client->sendMessage(":server 401 " + client->getNickName() + " " + target + " :No such nick/channel");
+			client->enqueueMessage(":server 401 " + client->getNickName() + " " + target + " :No such nick/channel");
 			return;
 		}
-		targetClient->sendMessage(formattedMessage);
+		targetClient->enqueueMessage(formattedMessage);
 	}
 }

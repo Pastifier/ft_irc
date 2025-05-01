@@ -4,13 +4,13 @@
 
 void Part::execute(Server *server, Client *client, const std::string& params) {
 	if (!client->isRegistered()) {
-		client->sendMessage(":server 451 :You have not registered");
+		client->enqueueMessage(":server 451 :You have not registered");
 		return;
 	}
 	std::istringstream iss(params);
 	std::string channelList, partMessage;
 	if (!(iss >> channelList)) {
-		client->sendMessage(":Server 461 " + client->getNickName() + " PART :Not enough parameters\r\n");
+		client->enqueueMessage(":Server 461 " + client->getNickName() + " PART :Not enough parameters\r\n");
 		return;
 	}
 	std::getline(iss >> std::ws, partMessage);
@@ -28,16 +28,16 @@ void Part::execute(Server *server, Client *client, const std::string& params) {
 		channel.erase(0, channel.find_first_not_of(" "));
 		channel.erase(channel.find_last_not_of(" ") + 1);
 		if (channel.empty() || channel[0] != '#') {
-			client->sendMessage(":Server 403 " + client->getNickName() + " " + channel + " :No such channel\r\n");
+			client->enqueueMessage(":Server 403 " + client->getNickName() + " " + channel + " :No such channel\r\n");
 			continue;
 		}
 		Channels *targetChannel = server->findChannels(channel);
 		if (!targetChannel) {
-			client->sendMessage(":server 403 " + client->getNickName() + " " + channel + " :No such channel\r\n");
+			client->enqueueMessage(":server 403 " + client->getNickName() + " " + channel + " :No such channel\r\n");
 			continue;
 		}
 		if (!targetChannel->hasClient(client)) {
-			client->sendMessage(":Server 442 " + client->getNickName() + " " + channel + " :You're not on that channel\r\n");
+			client->enqueueMessage(":Server 442 " + client->getNickName() + " " + channel + " :You're not on that channel\r\n");
 			continue;
 		}
 		std::string partNotification = ":" + client->getNickName() +
