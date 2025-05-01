@@ -11,6 +11,8 @@
 #include "printing.hpp"
 #include "Channels.hpp"
 
+extern size_t g_enqueueCount;
+
 class Channels;
 
 class Client {
@@ -54,7 +56,11 @@ public:
 	void clearInBuffer() {_inbuff.clear(); }
 	std::queue<std::string> outputMessages;
 
-	void enqueMessage(const std::string& message) { outputMessages.push(message); }
+	/////
+	void enqueueMessage(const std::string& message) {
+		outputMessages.push(message + "\r\n");
+		++g_enqueueCount;
+	}
 
 	/**
 	 * @brief Buffer handling
@@ -74,5 +80,6 @@ public:
 	/**
 	 * @brief Message Handling
 	 */
-	void enqueueMessage(const std::string& message);
+	// void enqueueMessage(const std::string& message);
+	void sendMessage(const std::string& message);
 };
