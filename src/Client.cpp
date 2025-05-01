@@ -126,7 +126,7 @@ bool Client::hasCompleteLine() const {
  * if the message fails to send or if not all bytes were sent.
  * @param message 
  */
-void Client::enqueueMessage(const std::string& message) {
+void Client::sendMessage(const std::string& message) {
 	if (_socket < 0)
 		return; //Silently return for virtual clients.
 	std::string formattedMessage = message;

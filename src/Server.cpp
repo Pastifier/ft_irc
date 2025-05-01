@@ -2,6 +2,7 @@
 #include "IrcBot.hpp"
 
 Server *g_server = NULL;
+size_t g_enqueueCount = 0;
 
 Server::Server(int port, const std::string& password)
     : _serverSocket(NULL),
@@ -176,7 +177,7 @@ void Server::run() {
 					_pollfds[i].fd = -1;
 				}
             }
-			if (_pollfds[i].revents & POLLOUT) {
+			if (_pollfds[i].revents & POLLOUT && g_enqueueCount > 0) {
 				int clientFd = _pollfds[i].fd;
 				size_t clientIndex = 0;
 				bool clientfound = false;
@@ -289,10 +290,20 @@ void Server::handleClientOutput(size_t clientIndex) {
 	// std::string buffer = client->getOutBuffer();
 	// client->clearOutBuffer();
 	// send(client->getSocket(), buffer.c_str(), buffer.size(), 0);
-	while (!client->outputMessages.empty()) {
-		std::string message = client->outputMessages.front();
+	/*while*/ if (!client->outputMessages.empty()) {
+		// std::string message = client->outputMessages.front();
+		ssize_t bytesSent = send(client->getSocket(), (client->outputMessages.front()).c_str(), (client->outputMessages.front()).size(), 0);
+		if (bytesSent < 0) {
+			if (errno != EAGAIN && errno != EWOULDBLOCK) {
+				//EAGAIN indicates that the resource is temporarily unavailable
+				//EWOULDBLOCK indicates the operation cannot proceed at the moment because it would block
+				perror("send failed");
+				removeClient(client);
+			}
+			return;
+		}
 		client->outputMessages.pop();
-		send(client->getSocket(), message.c_str(), message.size(), 0);
+		--g_enqueueCount;
 	}
 }
 
@@ -402,7 +413,7 @@ void Server::registerClient(Client *client) {
 	_resizePollArrayIfNeeded(_pollfdCount + 1);
 	_preparePollArray();
 	std::string welcomeMessage = ":" + _name + " NOTICE :Welcome to " + _name + " v" + _version + "\r\n";
-	client->enqueueMessage(welcomeMessage);
+	client->sendMessage(welcomeMessage);
 	std::cout << "New client registered from " << client->getHostname() << std::endl;
 }
 
