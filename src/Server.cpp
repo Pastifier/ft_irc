@@ -110,7 +110,7 @@ void Server::_preparePollArray() {
         int clientFd = _clients[i]->getSocket();
         if (clientFd != -1) {
             _pollfds[_pollfdCount].fd = clientFd;
-            _pollfds[_pollfdCount].events = POLLIN;
+            _pollfds[_pollfdCount].events = POLLIN | POLLOUT;
             _pollfds[_pollfdCount].revents = 0;
             _pollfdCount++;
         }
@@ -176,6 +176,21 @@ void Server::run() {
 					_pollfds[i].fd = -1;
 				}
             }
+			if (_pollfds[i].revents & POLLOUT) {
+				int clientFd = _pollfds[i].fd;
+				size_t clientIndex = 0;
+				bool clientfound = false;
+				//Search for the client with this socket
+				for (size_t j = 0; j < _clients.size(); j++) {
+					if (_clients[j]->getSocket() == clientFd) {
+						clientIndex = j;
+						clientfound = true;
+						break;
+					}
+				}
+				if (clientfound)
+					handleClientOutput(clientIndex);
+			}
         }
     }
 }
@@ -206,18 +221,18 @@ void Server::executeCommand(Client *client, const std::string& command, const st
 	if (it == _commands.end()) {
 		std::string response = ":server 421 " + (client->isRegistered() ? client->getNickName() : "*") +
 			" " + command + " :Unknown command\r\n";
-		client->sendMessage(response);
+		client->enqueueMessage(response);
 		return;
 	}
 	if (!client->isAuthenticated() && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT" && command != "CAP") {
 		std::string response = ":server 464 " + (client->isRegistered() ? client->getNickName(): "*") +
 			" :Password required\r\n";
-		client->sendMessage(response);
+		client->enqueueMessage(response);
 		return;
 	}
 	if (client->getNickName() == "*" && command != "PASS" && command != "NICK" && command != "USER" && command != "QUIT" && command != "HELP") {
 		std::string response = ":server 451 * :You have not registered. Type HELP to learn how to register\r\n";
-		client->sendMessage(response);
+		client->enqueueMessage(response);
 		return;
 	}
 	try {
@@ -226,7 +241,7 @@ void Server::executeCommand(Client *client, const std::string& command, const st
 		std::cerr << "Error executing command " << command << ":" << e.what() << std::endl;
 		std::string response = ":server 500 " + (client->isRegistered() ? client->getNickName() : "*") +
 			" :Internal server error\r\n";
-		client->sendMessage(response);
+		client->enqueueMessage(response);
 	}
 }
 
@@ -259,6 +274,26 @@ void Server::processCommand(Client *client, const std::string& line) {
 	for (size_t i = 0; i < cmd.size(); i++)
 		cmd[i] = toupper(cmd[i]);
 	executeCommand(client, cmd, params);
+}
+
+// This function is to deal with POLLOUT event
+void Server::handleClientOutput(size_t clientIndex) {
+	Client *client = _clients[clientIndex];
+	if (!client) {
+		ERROR("Client not found for socket");
+		return;
+	}
+	// if (client->getOutBuffer().empty()) {
+	// 	return;
+	// }
+	// std::string buffer = client->getOutBuffer();
+	// client->clearOutBuffer();
+	// send(client->getSocket(), buffer.c_str(), buffer.size(), 0);
+	while (!client->outputMessages.empty()) {
+		std::string message = client->outputMessages.front();
+		client->outputMessages.pop();
+		send(client->getSocket(), message.c_str(), message.size(), 0);
+	}
 }
 
 void Server::handleClientData(size_t clientIndex)
@@ -321,7 +356,7 @@ void Server::sendToChannel(Channels *channel, const std::string& message, Client
 	std::vector<Client *> clients = channel->getClients();
 	for (size_t i = 0; i < clients.size(); ++i) {
 		if (clients[i] != exclude) {
-			clients[i]->sendMessage(message);
+			clients[i]->enqueueMessage(message);
 		}
 	}
 }
@@ -367,7 +402,7 @@ void Server::registerClient(Client *client) {
 	_resizePollArrayIfNeeded(_pollfdCount + 1);
 	_preparePollArray();
 	std::string welcomeMessage = ":" + _name + " NOTICE :Welcome to " + _name + " v" + _version + "\r\n";
-	client->sendMessage(welcomeMessage);
+	client->enqueueMessage(welcomeMessage);
 	std::cout << "New client registered from " << client->getHostname() << std::endl;
 }
 
@@ -399,7 +434,7 @@ Client *Server::findClientByNickname(const std::string& nickname) {
 void Server::broadcastMessage(const std::string& message) {
 	for (std::vector<Client *>::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		if (*it)
-			(*it)->sendMessage(message);
+			(*it)->enqueueMessage(message);
 	}
 }
 
