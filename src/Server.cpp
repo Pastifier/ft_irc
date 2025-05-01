@@ -290,7 +290,7 @@ void Server::handleClientOutput(size_t clientIndex) {
 	// std::string buffer = client->getOutBuffer();
 	// client->clearOutBuffer();
 	// send(client->getSocket(), buffer.c_str(), buffer.size(), 0);
-	/*while*/ if (!client->outputMessages.empty()) {
+	while (!client->outputMessages.empty()) {
 		// std::string message = client->outputMessages.front();
 		ssize_t bytesSent = send(client->getSocket(), (client->outputMessages.front()).c_str(), (client->outputMessages.front()).size(), 0);
 		if (bytesSent < 0) {
