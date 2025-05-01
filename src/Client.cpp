@@ -7,7 +7,7 @@
 
 Client::Client(int socket)
 	: _socket(socket), _nickname("*"), _username(""), _hostname("localhost"), _realname(""),
-	_authenticated(false), _registered(false), _buffer(""), _isOperator(false) {}
+	_authenticated(false), _registered(false), _inbuff(""), _isOperator(false) {}
 
 Client::~Client() {
 	if (_socket >= 0) {
@@ -77,7 +77,7 @@ int Client::getSocket() const {
 }
 
 void Client::appendToBuffer(const std::string& data) {
-	_buffer += data;
+	_inbuff += data;
 }
 
 /**
@@ -87,15 +87,15 @@ void Client::appendToBuffer(const std::string& data) {
  */
 std::string Client::getLine() {
 	std::string line;
-	size_t pos = _buffer.find("\r\n"); //Find eol maker (CR+LF in IRC protocol)
+	size_t pos = _inbuff.find("\r\n"); //Find eol maker (CR+LF in IRC protocol)
 	if (pos != std::string::npos) {
-		line = _buffer.substr(0, pos); //Extract the line
-		_buffer = _buffer.substr(pos + 2); //Remove the line from buffer
+		line = _inbuff.substr(0, pos); //Extract the line
+		_inbuff = _inbuff.substr(pos + 2); //Remove the line from buffer
 	} else {
-		pos = _buffer.find("\n");
+		pos = _inbuff.find("\n");
 		if (pos != std::string::npos) {
-			line = _buffer.substr(0, pos);
-			_buffer = _buffer.substr(pos + 1);
+			line = _inbuff.substr(0, pos);
+			_inbuff = _inbuff.substr(pos + 1);
 		} else {
 			// No complete line found, return empty string
 			return "";
@@ -111,13 +111,13 @@ std::string Client::getLine() {
 }
 
 /**
- * @brief This function checks whether the _buffer contains a complete line by searching for newline 
+ * @brief This function checks whether the _inbuff contains a complete line by searching for newline 
  * delimiters ("\r\n" or "\n").
  * @return true 
  * @return false 
  */
 bool Client::hasCompleteLine() const {
-	return _buffer.find("\r\n") != std::string::npos || _buffer.find("\n") != std::string::npos;
+	return _inbuff.find("\r\n") != std::string::npos || _inbuff.find("\n") != std::string::npos;
 }
 
 /**

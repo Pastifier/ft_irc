@@ -25,12 +25,12 @@ void Dcc::sendData(Client *clientSender, Client *clientReceiver, const std::stri
 			" NOTICE " + clientReceiver->getNickName() +
 			" :DCC SEND " + filename + " " +
 			mid.str() + " bytes";
-		clientReceiver->sendMessage(message);
-		clientSender->sendMessage(":server NOTICE " + clientSender->getNickName() +
+		clientReceiver->enqueueMessage(message);
+		clientSender->enqueueMessage(":server NOTICE " + clientSender->getNickName() +
 			" :DCC SEND offer sent to " + clientReceiver->getNickName());
 	} else {
 		//file not found, notify sender
-		clientSender->sendMessage(":server NOTICE " + clientSender->getNickName() +
+		clientSender->enqueueMessage(":server NOTICE " + clientSender->getNickName() +
 			" :Error: File not found - " + filename);
 	}
 }
@@ -38,14 +38,14 @@ void Dcc::sendData(Client *clientSender, Client *clientReceiver, const std::stri
 void Dcc::receiveData(Client *clientSender, Client *clientReceiver, const std::string& filename) {
 	//check if the file transfer exists
 	if (transfers.find(filename) == transfers.end()) {
-		clientReceiver->sendMessage(":server NOTICE " + clientReceiver->getNickName() +
+		clientReceiver->enqueueMessage(":server NOTICE " + clientReceiver->getNickName() +
 				" :Error: No such file transfer - " + filename);
 		return;
 	}
 	FileTransfer& transfer = transfers[filename];
 	if (transfer.sender != clientSender->getNickName() || 
 		transfer.recipient != clientReceiver->getNickName()) {
-		clientReceiver->sendMessage(":server NOTICE " + clientReceiver->getNickName() + 
+		clientReceiver->enqueueMessage(":server NOTICE " + clientReceiver->getNickName() + 
 		" :Error: You are not authorized for this transfer");
 		return;
 	}
@@ -57,9 +57,9 @@ void Dcc::receiveData(Client *clientSender, Client *clientReceiver, const std::s
 	std::string message = ":server NOTICE " + clientReceiver->getNickName() +
 		" :DCC GET complete - " + filename + "  (" +
 		mid.str() + " bytes )";
-	clientReceiver->sendMessage(message);
+	clientReceiver->enqueueMessage(message);
 	//notify sender
-	clientSender->sendMessage(":server NOTICE " + clientSender->getNickName() +
+	clientSender->enqueueMessage(":server NOTICE " + clientSender->getNickName() +
 			" :DCC transfer complete - " + filename);
 }
 
@@ -84,7 +84,7 @@ void Dcc::execute(Server *server, Client *client, const std::string& params) {
 	iss >> filename;
 	Client *targetClient = server->findClientByNickname(targetNick);
 	if (!targetClient) {
-		client->sendMessage(":server NOTICE " + client->getNickName() + 
+		client->enqueueMessage(":server NOTICE " + client->getNickName() + 
 			" :Error: No such nickname - " + targetNick);
 		return;
 	}
@@ -93,7 +93,7 @@ void Dcc::execute(Server *server, Client *client, const std::string& params) {
 	else if (subCommand == "GET")
 		receiveData(targetClient, client, filename);
 	else {
-		client->sendMessage(":server NOTICE " + client->getNickName() + 
+		client->enqueueMessage(":server NOTICE " + client->getNickName() + 
 			" :Error: Unkown DCC comand - " + subCommand);
 	}
 }

@@ -32,6 +32,7 @@ public:
     
     void handleNewConnection();
     void handleClientData(size_t clientIndex);
+    void handleClientOutput(size_t clientIndex);
     void registerClient(Client* client);
     void removeClient(Client* client);
     Client* findClientByNickname(const std::string& nickname);

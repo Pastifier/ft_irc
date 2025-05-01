@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -10,6 +11,8 @@
 #include "printing.hpp"
 #include "Channels.hpp"
 
+extern size_t g_enqueueCount;
+
 class Channels;
 
 class Client {
@@ -19,9 +22,10 @@ private:
 	std::string _username;
 	std::string _hostname;
 	std::string _realname;
+	// std::string _outbuff;
 	bool _authenticated;
 	bool _registered;
-	std::string _buffer;
+	std::string _inbuff;
 	bool _isOperator;
 	std::vector<Channels *> _channels;
 public:
@@ -46,6 +50,17 @@ public:
 	void setOperator(bool op);
 	bool isOperator() const;
 	int getSocket() const;
+	std::string getInBuffer() const { return _inbuff; }
+	// std::string getOutBuffer() const { return _outbuff; }
+	// void clearOutBuffer() { _outbuff.clear(); }
+	void clearInBuffer() {_inbuff.clear(); }
+	std::queue<std::string> outputMessages;
+
+	/////
+	void enqueueMessage(const std::string& message) {
+		outputMessages.push(message + "\r\n");
+		++g_enqueueCount;
+	}
 
 	/**
 	 * @brief Buffer handling
@@ -65,5 +80,6 @@ public:
 	/**
 	 * @brief Message Handling
 	 */
+	// void enqueueMessage(const std::string& message);
 	void sendMessage(const std::string& message);
 };

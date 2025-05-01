@@ -36,6 +36,6 @@ void Notice::execute(Server *server, Client *client, const std::string& params) 
 		Client *targetClient = server->findClientByNickname(target);
 		if (!targetClient)
 			return;
-		targetClient->sendMessage(formattedMessage);
+		targetClient->enqueueMessage(formattedMessage);
 	}
 }

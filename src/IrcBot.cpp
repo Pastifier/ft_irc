@@ -63,7 +63,7 @@ void IrcBot::sendMsg(Server *server, const std::string& channel, const std::stri
 	else {
 		Client *targetClient = server->findClientByNickname(channel);
 		if (targetClient)
-			targetClient->sendMessage(fullMessage);
+			targetClient->enqueueMessage(fullMessage);
 		else {
 			this->sendMsg(server, this->getNickName(), "401 " + this->getNickName() + " "
 				+ channel + " :No such nick/channel");

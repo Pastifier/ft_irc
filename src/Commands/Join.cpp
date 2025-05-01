@@ -3,13 +3,13 @@
 
 void Join::execute(Server *server, Client *client, const std::string& params) {
 	if (!client->isRegistered()) {
-		client->sendMessage(":server 451 " + client->getNickName() + " :You have not registered");
+		client->enqueueMessage(":server 451 " + client->getNickName() + " :You have not registered");
 		return;
 	}
 	std::istringstream iss(params);
 	std::string channelParameter, keyParameter;
 	if (!(iss >> channelParameter)) {
-		client->sendMessage(":server 461 " + client->getNickName() + " Join :Not enough parameters");
+		client->enqueueMessage(":server 461 " + client->getNickName() + " Join :Not enough parameters");
 		return;
 	}
 	iss >> keyParameter;
@@ -38,7 +38,7 @@ void Join::execute(Server *server, Client *client, const std::string& params) {
 		const std::string& channelName = channelNames[i];
 		//check if channel name starts with # or &
 		if (channelName.empty() || (channelName[0] != '#' && channelName[0] != '&')) {
-			client->sendMessage(":server 403 " + client->getNickName() + " " + channelName + " No such channel");
+			client->enqueueMessage(":server 403 " + client->getNickName() + " " + channelName + " No such channel");
 			continue;
 		}
 		//get the key for this channel if provided.
@@ -47,7 +47,7 @@ void Join::execute(Server *server, Client *client, const std::string& params) {
 		if (!channel) {
 			channel = server->createChannels(channelName);
 			if (!channel) {
-				client->sendMessage(":server 403 " + client->getNickName() + " " + channelName + " :Cannot create channel");
+				client->enqueueMessage(":server 403 " + client->getNickName() + " " + channelName + " :Cannot create channel");
 				continue;
 			}
 			client->joinChannel(channel);
@@ -60,17 +60,17 @@ void Join::execute(Server *server, Client *client, const std::string& params) {
 			}
 			//check user limit
 			if (channel->getUserLimit() > 0 && channel->getClientCount() >= channel->getUserLimit()) {
-				client->sendMessage(":server 471 " + client->getNickName() + " " + channelName + " :Cannot join channel (+l)");
+				client->enqueueMessage(":server 471 " + client->getNickName() + " " + channelName + " :Cannot join channel (+l)");
 				continue;
 			}
 			if (!channel->getPassword().empty()) {
 				if (providedkey != channel->getPassword()) {
-					client->sendMessage(":server 475 " + client->getNickName() + " " + channelName + " :Cannot join channel (+k)");
+					client->enqueueMessage(":server 475 " + client->getNickName() + " " + channelName + " :Cannot join channel (+k)");
 					continue;
 				}
 			}
 			if (channel->isInviteOnly() && !channel->isInvited(client) && !channel->isOperator(client)) {
-				client->sendMessage(":server 473 " + client->getNickName() + " " + channelName + " :Cannot join channel (+i)");
+				client->enqueueMessage(":server 473 " + client->getNickName() + " " + channelName + " :Cannot join channel (+i)");
 				continue;
 			}
 		}
@@ -84,9 +84,9 @@ void Join::execute(Server *server, Client *client, const std::string& params) {
 				" JOIN :" + channelName;
 		std::vector<Client *> channelClients = channel->getClients();
 		for (size_t j = 0; j < channelClients.size(); ++j)
-			channelClients[j]->sendMessage(joinMessage);
+			channelClients[j]->enqueueMessage(joinMessage);
 		if (channel->getTopic().length() > 0)
-			client->sendMessage(":server 332 " + client->getNickName() + " " + channelName + " :" + channel->getTopic());
+			client->enqueueMessage(":server 332 " + client->getNickName() + " " + channelName + " :" + channel->getTopic());
 		//send list of users in channel
 		std::string namesList;
 		for (size_t j = 0; j < channelClients.size(); ++j) {
@@ -98,7 +98,7 @@ void Join::execute(Server *server, Client *client, const std::string& params) {
 			if (j < channelClients.size() - 1)
 				namesList += " ";
 		}
-		client->sendMessage(":server 353 " + client->getNickName() + " = " + channelName + " :" + namesList);
-		client->sendMessage(":server 366 " + client->getNickName() + " " + channelName + " :End of /NAMES list");
+		client->enqueueMessage(":server 353 " + client->getNickName() + " = " + channelName + " :" + namesList);
+		client->enqueueMessage(":server 366 " + client->getNickName() + " " + channelName + " :End of /NAMES list");
 	}
 }
